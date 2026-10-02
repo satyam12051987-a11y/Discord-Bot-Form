@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Discord Bot Order Form</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f4fb;--card:#fff;--ink:#1b1d2a;--mute:#5d6178;--line:#d9dbea;--acc:#5865f2;--accink:#fff;--sel:#e8eaff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161d;--card:#1f2029;--ink:#eceef8;--mute:#9ea2bb;--line:#33354a;--acc:#7983f5;--accink:#10111a;--sel:#2a2d4a}}
+:root[data-theme="dark"]{--bg:#15161d;--card:#1f2029;--ink:#eceef8;--mute:#9ea2bb;--line:#33354a;--acc:#7983f5;--accink:#10111a;--sel:#2a2d4a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 120px}
+h1{font-size:1.6rem;line-height:1.2;margin:8px 0 6px}
+.lead{color:var(--mute);margin:0 0 20px}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{font-size:1.05rem;margin:0 0 4px}
+.hint{color:var(--mute);font-size:.88rem;margin:0 0 12px}
+label.f{display:block;font-size:.9rem;margin-bottom:12px}
+input[type=text],select,textarea{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:84px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:420px){.grid{grid-template-columns:1fr}}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:.93rem}
+.opt:has(input:checked){background:var(--sel);border-color:var(--acc)}
+.opt input{margin-top:3px;width:18px;height:18px;accent-color:var(--acc);flex:none}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;justify-content:center}
+.bar span{color:var(--mute);font-size:.9rem}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:11px 18px;background:var(--acc);color:var(--accink);cursor:pointer}
+button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#out{display:none}
+#out pre{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;font:.86rem/1.5 ui-monospace,Menlo,Consolas,monospace;margin:0 0 12px}
+.err{color:#d93a4a;font-size:.82rem;margin-top:4px;display:none}
+.bad{border-color:#d93a4a !important}
+.note{color:#d93a4a;font-weight:700;margin:0 0 14px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<main>
+  <h1>Discord Bot Order Form</h1>
+  <p class="lead">Tick the features and channels you need, then copy the summary and send it to me in a DM.</p>
+
+  <section>
+    <h2>Your details</h2>
+    <label class="f">Your name *<input type="text" id="name" autocomplete="name"><span class="err" id="e-name">Please enter your name.</span></label>
+    <label class="f">Discord username *<input type="text" id="user" placeholder="@username"><span class="err" id="e-user">Please enter your Discord username.</span></label>
+    <label class="f">Server name<input type="text" id="server"></label>
+    <div class="grid">
+      <label class="f">Budget (₹, minimum 150) *<input type="number" id="budget" min="150" step="1" inputmode="numeric" placeholder="e.g. 500"><span class="err" id="e-budget">Minimum budget is ₹150.</span><span class="hint" id="est" style="display:block;margin:6px 0 0"></span></label>
+      <label class="f">Deadline (days) *<input type="number" id="deadline" min="1" step="1" inputmode="numeric" placeholder="e.g. 7"><span class="err" id="e-deadline">Enter the number of days (1 or more).</span></label>
+    </div>
+    <p class="hint" style="margin:-4px 0 12px"><strong>Any problem with the price?</strong> Talk to me in a Discord DM.</p>
+  </section>
+
+  <section>
+    <h2>Bot profile</h2>
+    <label class="f">Bot name *<input type="text" id="botname" placeholder="e.g. Nova"><span class="err" id="e-botname">Please enter a bot name.</span></label>
+    <label class="f">Bot bio (About Me)
+      <textarea id="botbio" placeholder="A short description shown on the bot's profile"></textarea>
+    </label>
+  </section>
+
+  <div id="groups"></div>
+
+  <section>
+    <h2>Hosting and commands</h2>
+    <p class="hint"><strong>Note:</strong> Hosting is not provided by us. We only create the bot and set it up on your hosting.</p>
+    <label class="f">Do you have hosting?
+      <select id="host">
+        <option>Yes, I have hosting / a VPS</option>
+        <option>Not yet, I will get one myself</option>
+      </select>
+    </label>
+    <label class="f">Command type
+      <select id="cmd">
+        <option>Slash commands (/)</option>
+        <option>Prefix commands (!)</option>
+        <option>Both</option>
+      </select>
+    </label>
+  </section>
+
+  <section>
+    <h2>Anything else?</h2>
+    <p class="hint">Extra features, theme colour, or a reference bot you like.</p>
+    <textarea id="extra"></textarea>
+  </section>
+
+  <p class="note">After filling the form, tap "Create summary", copy it, and send it to me in a Discord DM. Your order is not received until you DM me.</p>
+
+  <section id="out">
+    <h2>Your summary</h2>
+    <p class="note">Copy this summary and send it to me in a Discord DM. Your order is not received until you DM me.</p>
+    <pre id="txt"></pre>
+    <div class="row"><button id="copy">Copy summary</button><button class="alt" id="back">Edit form</button></div>
+  </section>
+</main>
+
+<div class="bar"><span id="count">0 selected</span><button id="make">Create summary</button></div>
+
+<script>
+var DEV = ""; // put your Discord username here, e.g. "@yourname"
+var G = [
+ ["Moderation","Keep your server safe",["Ban / Kick / Mute / Timeout","Warn system","Auto-mod (spam, links, bad words)","Anti-raid / anti-nuke","Clear / purge messages","Slowmode & lock/unlock"]],
+ ["Welcome and roles","",["Welcome message / image","Leave message","Auto role on join","Reaction roles","Button / dropdown roles","Verification system"]],
+ ["Tickets and support","",["Ticket system (buttons)","Ticket transcripts","Support staff roles","Suggestion system","Report system","Application / form system"]],
+ ["Leveling and economy","",["XP & leveling","Leaderboard","Level rewards (roles)","Coins / economy","Shop & inventory","Daily / work commands"]],
+ ["Fun and games","",["Fun commands (meme, 8ball)","Mini games","Counting channel","Polls","Giveaways","AFK system"]],
+ ["Utility and logs","",["Message logs (edit / delete)","Member join / leave logs","Mod action logs","Server info / user info","Embed maker","Auto-responder / custom commands","Reminders","Announcement command"]],
+ ["Music (optional)","",["Play from YouTube / Spotify","Queue, skip, loop","24/7 voice mode"]],
+ ["Advanced","",["Database (MongoDB / SQLite)","Web dashboard","Multi-language","Premium / paid features","Custom branding (name, logo, status)"]],
+ ["Discord channels","Channels the bot should create or use",["#welcome","#rules","#announcements","#general-chat","#bot-commands","#logs / #mod-logs","#tickets","#support","#giveaways","#suggestions","#verify","#leaderboard","#level-up","#counting","#polls","Voice channels"]]
+];
+// Pricing in INR (edit these)
+var BASE=150;  // base price
+var FREE=10;   // features included in the base price
+var PER=25;    // price for each feature after the first FREE
+function estimate(){
+  var n=0;
+  document.querySelectorAll("input[type=checkbox]:checked").forEach(function(x){
+    if(+x.dataset.g!==8)n++;   // channels are not counted
+  });
+  return BASE+Math.max(0,n-FREE)*PER;
+}
+var wrap=document.getElementById("groups");
+G.forEach(function(g,i){
+  var s=document.createElement("section"),h="<h2>"+g[0]+"</h2>"+(g[1]?'<p class="hint">'+g[1]+"</p>":"")+'<div class="grid">';
+  g[2].forEach(function(o,k){h+='<label class="opt"><input type="checkbox" data-g="'+i+'" data-i="'+k+'" value="'+o+'"><span>'+o+"</span></label>";});
+  s.innerHTML=h+"</div>";wrap.appendChild(s);
+});
+function upd(){
+  var e=estimate();
+  document.getElementById("count").textContent=document.querySelectorAll("input[type=checkbox]:checked").length+" selected · Min ₹"+e;
+  document.getElementById("est").textContent="Minimum for your selected features: ₹"+e+" (first "+FREE+" features are included)";
+}
+upd();
+document.addEventListener("change",upd);
+function v(id){return document.getElementById(id).value.trim()||"-";}
+function chk(id,ok){var e=document.getElementById(id),m=document.getElementById("e-"+id);if(id==="budget")m.textContent="Minimum budget for your selected features is ₹"+estimate()+".";e.classList.toggle("bad",!ok);m.style.display=ok?"none":"block";return ok;}
+document.getElementById("make").onclick=function(){
+  var res=[chk("name",!!document.getElementById("name").value.trim()),chk("user",!!document.getElementById("user").value.trim()),chk("budget",parseFloat(document.getElementById("budget").value)>=estimate()),chk("deadline",parseInt(document.getElementById("deadline").value,10)>=1),chk("botname",!!document.getElementById("botname").value.trim())];
+  if(res.indexOf(false)>-1){var f=["name","user","budget","deadline","botname"][res.indexOf(false)];var el=document.getElementById(f);el.scrollIntoView({behavior:"smooth",block:"center"});el.focus();return;}
+  var t="*** BOT ORDER ***\nName: "+v("name")+"\nDiscord: "+v("user")+"\nServer: "+v("server")+"\nBudget: ₹"+v("budget")+" (minimum for selected features: ₹"+estimate()+")\nDeadline: "+v("deadline")+" days\n\nBot name: "+v("botname")+"\nBot bio: "+v("botbio")+"\n";
+  G.forEach(function(g,i){
+    var c=[].slice.call(document.querySelectorAll('input[data-g="'+i+'"]:checked')).map(function(x){return "  [x] "+x.value;});
+    if(c.length)t+="\n"+g[0]+":\n"+c.join("\n")+"\n";
+  });
+  t+="\nHosting (client's side): "+document.getElementById("host").value+"\nCommands: "+document.getElementById("cmd").value+"\nExtra: "+v("extra")+"\n"+(DEV?"\nSend to: "+DEV:"");
+  document.getElementById("txt").textContent=t;
+  var o=document.getElementById("out");o.style.display="block";o.scrollIntoView({behavior:"smooth"});
+};
+document.getElementById("copy").onclick=function(){
+  var b=this,t=document.getElementById("txt").textContent;
+  function ok(){b.textContent="Copied";setTimeout(function(){b.textContent="Copy summary";},1500);}
+  try{navigator.clipboard.writeText(t).then(ok,function(){fb(t);ok();});}catch(e){fb(t);ok();}
+};
+function fb(t){var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy");}catch(e){}a.remove();}
+document.getElementById("back").onclick=function(){document.getElementById("out").style.display="none";window.scrollTo({top:0,behavior:"smooth"});};
+</script>
+</body>
+</html>
